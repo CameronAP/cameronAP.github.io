@@ -1,0 +1,170 @@
+{
+  "nodes": [
+    {
+      "id": "95caede0",
+      "kind": "thing",
+      "label": "MSTN gene",
+      "base": 48,
+      "pos": {
+        "x": 22,
+        "y": 113
+      }
+    },
+    {
+      "id": "da5100e0",
+      "kind": "thing",
+      "label": "myostatin",
+      "base": 0,
+      "pos": {
+        "x": 338,
+        "y": 122
+      }
+    },
+    {
+      "id": "f004b4ac",
+      "kind": "thing",
+      "label": "myostatin",
+      "base": 51,
+      "pos": {
+        "x": 25,
+        "y": 441
+      }
+    },
+    {
+      "id": "b5728370",
+      "kind": "effect",
+      "effect": "inhibits",
+      "label": "inhibition of muscle tissue growth",
+      "base": -2,
+      "pos": {
+        "x": 324,
+        "y": 442
+      },
+      "scale": 0.7772727272727272
+    },
+    {
+      "id": "3b2470e3",
+      "kind": "thing",
+      "label": "muscle mass",
+      "base": 100,
+      "pos": {
+        "x": 652,
+        "y": 445
+      }
+    },
+    {
+      "id": "cc896686",
+      "kind": "thing",
+      "label": "MSTN gene",
+      "base": 49,
+      "pos": {
+        "x": 26,
+        "y": 737
+      }
+    },
+    {
+      "id": "be0a0845",
+      "kind": "thing",
+      "label": "myostatin",
+      "base": 2,
+      "pos": {
+        "x": 341,
+        "y": 742
+      }
+    },
+    {
+      "id": "564b2dec",
+      "kind": "effect",
+      "effect": "inhibits",
+      "label": "inhibition of muscle tissue growth",
+      "base": 0,
+      "pos": {
+        "x": 646,
+        "y": 740
+      },
+      "scale": 0.825
+    },
+    {
+      "id": "468312b7",
+      "kind": "thing",
+      "label": "muscle mass",
+      "base": 105,
+      "pos": {
+        "x": 951,
+        "y": 744
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "22b0d49b",
+      "from": "95caede0",
+      "to": "da5100e0",
+      "label": "codes"
+    },
+    {
+      "id": "fbc26de2",
+      "from": "f004b4ac",
+      "to": "b5728370"
+    },
+    {
+      "id": "20b7847e",
+      "from": "b5728370",
+      "to": "3b2470e3"
+    },
+    {
+      "id": "24a1d397",
+      "from": "cc896686",
+      "to": "be0a0845",
+      "label": "codes"
+    },
+    {
+      "id": "b1e17795",
+      "from": "be0a0845",
+      "to": "564b2dec"
+    },
+    {
+      "id": "b10d20ed",
+      "from": "564b2dec",
+      "to": "468312b7"
+    }
+  ],
+  "notes": [
+    {
+      "id": "9bbbcf1f",
+      "text": "the MSTN gene in cattle codes for the protein myostatin",
+      "pos": {
+        "x": 23,
+        "y": 23
+      },
+      "size": {
+        "w": 583,
+        "h": 68
+      }
+    },
+    {
+      "id": "61973498",
+      "text": "Myostatin inhibits the growth of muscle tissue",
+      "pos": {
+        "x": 27,
+        "y": 349
+      },
+      "size": {
+        "w": 600,
+        "h": 69
+      }
+    },
+    {
+      "id": "751ca0b2",
+      "text": "Effects of mutation in MSTN gene on muscle mass",
+      "pos": {
+        "x": 28,
+        "y": 660
+      },
+      "size": {
+        "w": 697,
+        "h": 36
+      }
+    }
+  ]
+}

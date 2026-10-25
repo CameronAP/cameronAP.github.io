@@ -1,0 +1,316 @@
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --border: #dde1e7;
+  --text: #1c2129;
+  --muted: #687384;
+  --pos: #1f9d55;
+  --neg: #d64545;
+  --accent: #3b6fe0;
+  --track: #e8ebf0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171c;
+    --surface: #1d2127;
+    --border: #2f353e;
+    --text: #e6e9ee;
+    --muted: #8d97a5;
+    --pos: #3fcf7c;
+    --neg: #f06868;
+    --accent: #6e95f0;
+    --track: #2a2f37;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+input, select, button { font: inherit; color: inherit; }
+input:not([type='range']), select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  min-width: 0;
+}
+button {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+input[type='range'] { accent-color: var(--accent); width: 100%; }
+
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.app-header { padding: 16px 24px 8px; }
+.app-header h1 { margin: 0; font-size: 1.4rem; }
+.app-header p { margin: 4px 0 0; color: var(--muted); }
+.app-main { flex: 1; display: flex; gap: 16px; padding: 8px 24px 24px; min-height: 0; }
+
+.canvas {
+  flex: 1;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.canvas-inner { position: relative; min-width: 100%; min-height: 100%; }
+.canvas-hint { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted); pointer-events: none; }
+
+/* Text boxes sit behind the chains and cards; the padding around the text is the drag area. */
+.note {
+  position: absolute;
+  z-index: 0;
+  padding: 8px;
+  border: 1px dashed transparent;
+  border-radius: 8px;
+  cursor: grab;
+  touch-action: none;
+  display: flex;
+  flex-direction: column;
+}
+.note:hover, .note:focus-within, .note.dragging { border-color: var(--border); }
+.note.dragging { cursor: grabbing; z-index: 4; }
+.note-text {
+  display: block;
+  flex: 1 0 auto;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  font: inherit;
+  line-height: 1.35;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  overflow-wrap: anywhere;
+}
+.note-text:focus { outline: none; }
+.note-remove { position: absolute; top: -10px; right: -10px; visibility: hidden; background: var(--surface); border-radius: 50%; }
+.note-resize {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  touch-action: none;
+  visibility: hidden;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  border-bottom-right-radius: 8px;
+}
+.note:hover .note-remove, .note:focus-within .note-remove,
+.note:hover .note-resize, .note:focus-within .note-resize, .note.dragging .note-resize { visibility: visible; }
+.edges { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+/* Chains are plain arrows, colored by the effect they touch. */
+.chain { stroke-width: 2.5; }
+.chain-pos { stroke: var(--pos); }
+.chain-neg { stroke: var(--neg); }
+.chain-plain { stroke: var(--muted); }
+.chain-pending { stroke-dasharray: 6 5; opacity: 0.8; }
+.chain-pos-fill { fill: var(--pos); }
+.chain-neg-fill { fill: var(--neg); }
+.chain-plain-fill { fill: var(--muted); }
+
+.chain-label {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 2px 0 6px;
+  font-size: 0.8rem;
+}
+.chain-label input {
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.chain-label input:placeholder-shown { color: var(--muted); }
+.chain-label:has(input:placeholder-shown):not(:hover):not(:focus-within) { opacity: 0.55; }
+.chain-label .icon-btn { font-size: 0.9rem; padding: 0 4px; }
+
+.chain-handle {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  display: grid;
+  place-items: center;
+  cursor: crosshair;
+  touch-action: none;
+  z-index: 1;
+}
+.chain-handle svg { width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.chain-handle:hover { border-color: var(--accent); }
+.chain-handle:hover svg { stroke: var(--accent); }
+.drop-target.thing { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); }
+.drop-target.effect .effect-shape polygon { stroke: var(--accent); stroke-width: 3; stroke-dasharray: none; }
+
+.notice {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: var(--neg);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.thing, .effect {
+  /* Cards are white in both themes, so pin their palette to the light values. */
+  --surface: #ffffff;
+  --border: #dde1e7;
+  --text: #1c2129;
+  --muted: #687384;
+  --pos: #1f9d55;
+  --neg: #d64545;
+  --track: #e8ebf0;
+  --accent: #3b6fe0;
+  color: var(--text);
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.thing.dragging, .effect.dragging { cursor: grabbing; z-index: 3; }
+
+.thing {
+  z-index: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+.thing.dragging { box-shadow: 0 6px 18px rgb(0 0 0 / 0.18); }
+.card-scale { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: grid; place-items: center; }
+
+/* Sits on the shape's outline at the lower-right (45° on a circle, mid-edge on a diamond). */
+.scale-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--muted);
+  transform: translate(50%, 50%);
+  cursor: nwse-resize;
+  touch-action: none;
+  visibility: hidden;
+  z-index: 2;
+}
+.thing .scale-handle { right: 14.6%; bottom: 14.6%; }
+.effect .scale-handle { right: 25%; bottom: 25%; }
+.thing:hover .scale-handle, .effect:hover .scale-handle, .dragging .scale-handle { visibility: visible; }
+.scale-handle:hover { border-color: var(--accent); }
+.card-body { position: relative; width: 132px; display: flex; flex-direction: column; align-items: stretch; gap: 5px; }
+.thing .card-remove { position: absolute; top: 18px; right: 18px; }
+.effect .card-remove { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); }
+.card-label {
+  display: block;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 2px 4px;
+  overflow-wrap: anywhere;
+}
+.card-label:hover, .card-label:focus { border-color: var(--border); }
+
+.effect { z-index: 2; display: grid; place-items: center; }
+.effect-shape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.effect-shape polygon { fill: var(--surface); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.effect.pos .effect-shape polygon { stroke: var(--pos); }
+.effect.neg .effect-shape polygon { stroke: var(--neg); stroke-dasharray: 5 3; }
+.effect.dragging .effect-shape { filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.2)); }
+
+
+.icon-btn { background: transparent; color: var(--muted); padding: 0 6px; font-size: 1.1rem; }
+.icon-btn:hover { color: var(--neg); }
+
+.level {
+  --fill: 50%;
+  --color: var(--pos);
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  /* Filled portion up to the value, a faint tick at neutral (50), then the empty track. */
+  background:
+    linear-gradient(to right, transparent calc(50% - 1px), rgb(0 0 0 / 0.3) calc(50% - 1px), rgb(0 0 0 / 0.3) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to right, var(--color) var(--fill), var(--track) var(--fill));
+}
+.level.down { --color: var(--neg); }
+.level:disabled { cursor: default; }
+.level:disabled::-webkit-slider-thumb { visibility: hidden; }
+.level:disabled::-moz-range-thumb { visibility: hidden; }
+.level::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--color);
+}
+.level::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--color);
+}
+
+.sidebar { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.panel h2 { margin: 0; font-size: 0.95rem; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row > input:not([type='range']) { flex: 1; }
+.error { margin: 0; color: var(--neg); font-size: 0.85rem; }
+.muted { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.reset { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+@media (max-width: 800px) {
+  .app-main { flex-direction: column; padding: 8px 16px 16px; }
+  .app-header { padding: 16px 16px 8px; }
+  .sidebar { width: auto; }
+  .canvas { min-height: 420px; }
+}
